@@ -29,9 +29,24 @@ minutele se contorizeaza din nou (~10 min/luna, cota gratuita e 2000).
 ## Ramase de facut
 - [x] Heartbeat in workflow (commit gol la fiecare rulare) - FACUT, testat
 - [x] `GITHUB_TOKEN` local inlocuit cu PAT classic - FACUT, preview:live merge
-- [ ] Prag absolut `SCAN_MIN_STARS_WITHIN` in query (vezi mai jos)
-- [ ] Template-urile trimit "Previous issues" catre releases-urile lui mhadidg,
-      nu ale tale: html.hbs:120, markdown.hbs:37, text.hbs:18
+- [x] Praguri pe trepte de marime + doua sectiuni cu locuri rezervate - FACUT
+- [x] Template-urile arata catre RanGrosu/github-famous/releases - FACUT
+- [x] GitHub Releases activate (arhiva de editii + notificari) - FACUT, #57 creat
+- [ ] Peste ~1 luna: reverifica pragurile. Sunt calibrate pe coverage-ul de
+      azi (~1,5%); daca ingestia ClickHouse se schimba, numerele nu mai tin.
+
+## Cum reglezi selectia (totul din .env, fara cod)
+SCAN_BIG_REPO_AT=10000     granita mic/mare, in stele REALE
+SCAN_MIN_STARS_SMALL=8     cat trebuie sa castige un repo mic (~+500 real)
+SCAN_MIN_STARS_BIG=30      cat trebuie sa castige unul mare (~+2000 real)
+RELEASE_TOP_DISCOVERIES=10 locuri rezervate sectiunii "fresh finds"
+RELEASE_TOP_MOVERS=10      locuri rezervate sectiunii "big movers"
+Sterge oricare din primele trei si te intorci la selectia veche, doar pe rata.
+
+De ce locuri rezervate si nu o singura lista: scorul (select.ts:20) e
+starsPerHour, marime absoluta. Un repo care ia 300 de stele bate mereu unul
+care ia 20, deci o lista unica ajunge intotdeauna numai repo-uri mari.
+Masurat: cu prag unic ieseau 2 mici / 17 mari; cu locuri rezervate, 10/10.
 
 ## Limitare importanta a sursei de date (masurat 2026-08-22)
 Datasetul public ClickHouse `github.events` are ingestia degradata:
