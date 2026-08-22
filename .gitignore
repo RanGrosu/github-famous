@@ -58,3 +58,8 @@ releases/
 .secrets/
 API.txt
 NPM START.png
+
+# Notite de lucru — raman locale, nu ajung in repo-ul public
+state.md
+roadmap.md
+.claude/
