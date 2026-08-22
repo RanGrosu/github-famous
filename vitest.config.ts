@@ -16,6 +16,7 @@ export default defineConfig({
       },
       exclude: [
         'node_modules/**', // Node modules
+        '.claude/**', // Tooling local (skills Claude Code), nu e cod de proiect
         'dist/**', // Compiled output
         'src/**/*.d.ts', // Type definitions
         'src/mocks/**', // Mock data
