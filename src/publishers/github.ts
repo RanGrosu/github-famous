@@ -29,7 +29,9 @@ export class GitHubPublisher extends Publisher {
     }
 
     const content = this.render(repos);
-    const client = new GitHubClient(process.env.GITHUB_TOKEN);
+    // Token separat: crearea de releases cere drept de scriere, in timp ce
+    // GITHUB_TOKEN e un PAT read-only pentru GraphQL public.
+    const client = new GitHubClient(process.env.GITHUB_RELEASES_TOKEN || process.env.GITHUB_TOKEN);
     const result = await client.createRelease(repo, {
       tag_name: this.releaseTag(),
       name: this.subject(),

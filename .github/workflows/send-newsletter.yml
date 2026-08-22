@@ -39,6 +39,9 @@ jobs:
         RESEND_FROM: ${{ vars.RESEND_FROM }}
         RESEND_TO: ${{ secrets.RESEND_TO }}
         GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        # Token-ul automat de Actions: are contents:write pe repo-ul asta,
+        # deci poate crea releases. GH_PAT e read-only si nu poate.
+        GITHUB_RELEASES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     # GitHub dezactiveaza cron-urile in repo-urile fara activitate 60 de zile.
     # Un commit gol la fiecare rulare reseteaza contorul, deci cron-ul nu moare.

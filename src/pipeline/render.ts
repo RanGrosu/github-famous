@@ -24,5 +24,28 @@ export function render(templateName: string, repos: ScoredRepo[]): string {
   const date = now.toISOString().split('T')[0];
 
   const descLimit = parseInt(process.env.RELEASE_TRUNCATE_DESC!);
-  return template({ repos, date, descLimit });
+
+  // Template-urile itereaza peste `sections`, ca sa nu duplicam markup-ul.
+  // Cand selectia nu e impartita pe categorii (sau repo-urile vin fara `section`,
+  // ca in teste), cade inapoi pe o singura sectiune cu toate repo-urile.
+  const discoveries = repos.filter(repo => repo.section === 'discoveries');
+  const movers = repos.filter(repo => repo.section === 'movers');
+
+  const sections =
+    discoveries.length || movers.length
+      ? [
+          {
+            title: '🌱 fresh finds',
+            subtitle: 'new projects picking up speed',
+            repos: discoveries,
+          },
+          {
+            title: '🚀 big movers',
+            subtitle: 'established repos surging this week',
+            repos: movers,
+          },
+        ].filter(section => section.repos.length > 0)
+      : [{ title: '🔥 fresh trends', subtitle: 'x3 star growth over the past week', repos }];
+
+  return template({ repos, sections, date, descLimit });
 }

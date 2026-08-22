@@ -1,39 +1,26 @@
 <div align="center">
 
 ## 🔥 Weekly GitHub trends
-*repositories with over 3x star growth over the past week*
 
 <table>
 <tr>
+{{#each sections}}
 <td width="50%" valign="top">
 
-## 🥇 **Tier 1**
+## {{title}}
+*{{subtitle}}*
 
 {{#each repos}}
-{{#if (lt @index 10)}}
 **[{{nameWithOwner}}]({{url}})** {{#if primaryLanguage.name}}`{{primaryLanguage.name}}`{{/if}} `⭐ {{formatNumber stargazerCount}}`
-{{#if description}}*{{truncate description ../descLimit}}*{{else}}*(no description)*{{/if}}
+{{#if description}}*{{truncate description @root.descLimit}}*{{else}}*(no description)*{{/if}}
 
-{{/if}}
 {{/each}}
 
 </td>
-<td width="50%" valign="top">
-
-## 🥈 **Tier 2**
-
-{{#each repos}}
-{{#if (and (gte @index 10) (lt @index 20))}}
-**[{{nameWithOwner}}]({{url}})** {{#if primaryLanguage.name}}`{{primaryLanguage.name}}`{{/if}} `⭐ {{formatNumber stargazerCount}}`
-{{#if description}}*{{truncate description ../descLimit}}*{{else}}*(no description)*{{/if}}
-
-{{/if}}
 {{/each}}
-
-</td>
 </tr>
 </table>
 
-*Generated on {{date}} • [Previous issues](https://github.com/mhadidg/gh-trends/releases)*
+*Generated on {{date}} • [Previous issues](https://github.com/RanGrosu/github-famous/releases)*
 
 </div>

@@ -1,21 +1,23 @@
 GITHUB TRENDS
 Your weekly dose of the hottest repositories on GitHub
+{{#each sections}}
 
-🚀 FRESH TRENDS
-3x star growth over the past week
+{{title}}
+{{subtitle}}
 
 ---
 {{#each repos}}
 
 {{nameWithOwner}}{{#if primaryLanguage.name}} - {{primaryLanguage.name}}{{/if}} ★ {{formatNumber stargazerCount}}
 {{url}}
-{{#if description}}{{truncate description ../descLimit}}{{else}}(no description){{/if}}
+{{#if description}}{{truncate description @root.descLimit}}{{else}}(no description){{/if}}
+{{/each}}
 {{/each}}
 
 ---
 
 Generated on {{date}}
-Previous issues: https://github.com/mhadidg/gh-trends/releases
+Previous issues: https://github.com/RanGrosu/github-famous/releases
 
 You're receiving this because you subscribed to GitHub Trends.
 To unsubscribe, reply with "unsubscribe"

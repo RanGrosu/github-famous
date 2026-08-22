@@ -41,6 +41,7 @@
                 </tr>
               </table>
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                  {{#each sections}}
                   <tr>
                     <td style="padding:0 0 40px 0;">
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
@@ -50,12 +51,12 @@
                               <tr>
                                 <td class="stack-column" valign="baseline" style="padding:0;vertical-align:baseline;">
                                   <h2 style="Margin:0;font-size:20px;font-weight:600;color:#24292e;">
-                                    🔥 fresh trends
+                                    {{title}}
                                   </h2>
                                 </td>
                                 <td class="stack-column" align="right" valign="middle" style="padding:0 0 0 12px;vertical-align:middle;">
                                   <span style="font-size:14px;color:#6a737d;font-style:italic;display:inline-block;">
-                                    x3 star growth over the past week
+                                    {{subtitle}}
                                   </span>
                                 </td>
                               </tr>
@@ -99,7 +100,7 @@
                               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
                                 <tr>
                                   <td style="padding:0;color:#586069;font-size:15px;line-height:1.5;">
-                                    {{#if description}}{{truncate description ../descLimit}}{{else}}(no description){{/if}}
+                                    {{#if description}}{{truncate description @root.descLimit}}{{else}}(no description){{/if}}
                                   </td>
                                 </tr>
                               </table>
@@ -109,6 +110,7 @@
                       </table>
                     </td>
                   </tr>
+                  {{/each}}
                 </table>
               <!-- Footer -->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
@@ -117,7 +119,7 @@
                     style="padding-top:48px;border-top:1px solid #e1e4e8;text-align:center;color:#6a737d;font-size:14px;">
                     <p style="Margin:8px 0;">
                       <strong>Generated on {{date}}</strong> •
-                      <a href="https://github.com/mhadidg/gh-trends/releases" style="color:#0366d6;text-decoration:none;">
+                      <a href="https://github.com/RanGrosu/github-famous/releases" style="color:#0366d6;text-decoration:none;">
                         Previous issues
                       </a>
                     </p>

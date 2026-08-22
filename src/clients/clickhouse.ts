@@ -57,6 +57,24 @@ export class ClickHouseClient {
     // Minimum repo star growth rate within the interval window for inclusion
     const growthRate = parseFloat(process.env.SCAN_MIN_GROWTH_RATE!);
 
+    // Praguri absolute pe trepte de marime. Filtrul de rata rateaza structural
+    // repo-urile mari (unul cu 240k stele care ia +2000 are raportul 0.008), dar
+    // un prag unic e la fel de gresit: trateaza la fel un repo cu 500 si unul cu 468k.
+    //
+    // ATENTIE la unitati, sunt DIFERITE:
+    //   starsBefore  = istoric, ingestie completa  -> stele REALE
+    //   starsWithin  = ultimele N zile, ~1,5% coverage -> imparte realul la ~65
+    // Deci +500 stele reale intr-o saptamana se scrie ca 8, iar +2000 ca 30.
+    const bigRepoAt = parseInt(process.env.SCAN_BIG_REPO_AT ?? '');
+    const minStarsSmall = parseInt(process.env.SCAN_MIN_STARS_SMALL ?? '');
+    const minStarsBig = parseInt(process.env.SCAN_MIN_STARS_BIG ?? '');
+
+    const tiered = [bigRepoAt, minStarsSmall, minStarsBig].every(n => Number.isFinite(n) && n > 0);
+    const absoluteClause = tiered
+      ? `OR (starsBefore <  ${bigRepoAt} AND starsWithin >= ${minStarsSmall})
+          OR (starsBefore >= ${bigRepoAt} AND starsWithin >= ${minStarsBig})`
+      : '';
+
     return `
       WITH
           '${evalDateStr}'::timestamp AS END_DATE,
@@ -71,7 +89,9 @@ export class ClickHouseClient {
       FROM github.events
       WHERE event_type = 'WatchEvent' AND created_at <= END_DATE
       GROUP BY repoName
-      HAVING starsBefore = 0 OR starsWithin / starsBefore > MIN_GROWTH_RATE
+      HAVING starsBefore = 0
+          OR starsWithin / starsBefore > MIN_GROWTH_RATE
+          ${absoluteClause}
       ORDER BY starsWithin DESC
       LIMIT LIMIT_N
       FORMAT JSON
