@@ -3,15 +3,14 @@ import { HttpError, TaggedError } from '../utils/logging';
 export interface ResendEmailPayload {
   subject: string;
   from: string;
-  audience_id: string;
-  name?: string;
+  to: string;
   html?: string;
   text?: string;
   reply_to?: string;
 }
 
 export class ResendClient {
-  public static readonly baseUrl = 'https://api.resend.com/broadcasts';
+  public static readonly baseUrl = 'https://api.resend.com/emails';
   private readonly apiKey: string;
 
   constructor(apiKey?: string) {
@@ -20,7 +19,7 @@ export class ResendClient {
   }
 
   async sendEmail(email: ResendEmailPayload): Promise<{ id: string }> {
-    const broadcastRes = await fetch(ResendClient.baseUrl, {
+    const res = await fetch(ResendClient.baseUrl, {
       method: 'POST',
       body: JSON.stringify(email),
       headers: {
@@ -29,29 +28,15 @@ export class ResendClient {
       },
     });
 
-    if (!broadcastRes.ok) {
-      throw new HttpError('resend', 'draft creation failed', broadcastRes);
+    if (!res.ok) {
+      throw new HttpError('resend', 'email sending failed', res);
     }
 
-    const broadcastJson = await broadcastRes.json();
-    if (!broadcastJson.id) {
-      throw new HttpError('resend', 'drafting returned no ID', broadcastRes);
+    const json = await res.json();
+    if (!json.id) {
+      throw new HttpError('resend', 'send returned no ID', res);
     }
 
-    if (process.env.RESEND_DRAFT !== 'true') {
-      const sendRes = await fetch(`${ResendClient.baseUrl}/${broadcastJson.id}/send`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!sendRes.ok) {
-        throw new HttpError('resend', 'email sending failed', sendRes);
-      }
-    }
-
-    return { id: broadcastJson.id };
+    return { id: json.id };
   }
 }

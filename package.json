@@ -11,13 +11,12 @@
   "scripts": {
     "clean": "rm -rf dist coverage",
     "build": "npm run clean && tsc -p tsconfig.build.json",
-    "start": "npm run build && NODE_ENV=production node dist/run.js",
-    "dev": "NODE_ENV=development tsx src/run.ts",
-    "dev:release:gh": "GITHUB_RELEASES_ENABLED=true npm run dev",
-    "dev:release:email": "RESEND_ENABLED=true npm run dev",
-    "dev:release:rss": "RSS_ENABLED=true npm run dev",
-    "preview": "NODE_ENV=development tsx src/preview.ts",
-    "preview:live": "USE_MOCK_REPOS=false npm run preview",
+    "start": "npm run build && cross-env NODE_ENV=production node dist/run.js",
+    "dev": "cross-env NODE_ENV=development tsx src/run.ts",
+    "dev:release:gh": "cross-env GITHUB_RELEASES_ENABLED=true npm run dev",
+    "dev:release:email": "cross-env RESEND_ENABLED=true npm run dev",
+    "preview": "cross-env NODE_ENV=development tsx src/preview.ts",
+    "preview:live": "cross-env USE_MOCK_REPOS=false npm run preview",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "typecheck": "tsc --noEmit",
@@ -32,6 +31,7 @@
     "@typescript-eslint/eslint-plugin": "^8.39.1",
     "@typescript-eslint/parser": "^8.39.1",
     "@vitest/coverage-v8": "^3.2.4",
+    "cross-env": "^10.1.0",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
@@ -47,8 +47,8 @@
   "dependencies": {
     "@types/handlebars": "^4.0.40",
     "dotenv-flow": "^4.1.0",
-    "fast-xml-parser": "^5.2.5",
-    "handlebars": "^4.7.8"
+    "handlebars": "^4.7.8",
+    "ws": "^8.19.0"
   },
   "lint-staged": {
     "src/**/*.{ts,js}": [

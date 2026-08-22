@@ -51,7 +51,7 @@ describe('resend.ts', () => {
   describe('publish.config', () => {
     it('should throw when RESEND_FROM is missing', async () => {
       vi.stubEnv('RESEND_FROM', undefined);
-      vi.stubEnv('RESEND_AUDIENCE_ID', 'aud_123');
+      vi.stubEnv('RESEND_TO', 'user@gmail.com');
       vi.stubEnv('RESEND_API_KEY', 're_live_key_123');
 
       await expect(instance.publish(repos)).rejects.toThrow('RESEND_FROM');
@@ -61,7 +61,7 @@ describe('resend.ts', () => {
 
     it('should throw when RESEND_FROM is empty', async () => {
       vi.stubEnv('RESEND_FROM', '');
-      vi.stubEnv('RESEND_AUDIENCE_ID', 'aud_123');
+      vi.stubEnv('RESEND_TO', 'user@gmail.com');
       vi.stubEnv('RESEND_API_KEY', 're_live_key_123');
 
       await expect(instance.publish(repos)).rejects.toThrow('RESEND_FROM');
@@ -69,29 +69,29 @@ describe('resend.ts', () => {
       expect(mockFetch).not.toHaveBeenCalled();
     });
 
-    it('should throw when RESEND_AUDIENCE_ID is missing', async () => {
+    it('should throw when RESEND_TO is missing', async () => {
       vi.stubEnv('RESEND_FROM', 'Sender <sender@example.com>');
-      vi.stubEnv('RESEND_AUDIENCE_ID', undefined);
+      vi.stubEnv('RESEND_TO', undefined);
       vi.stubEnv('RESEND_API_KEY', 're_live_key_123');
 
-      await expect(instance.publish(repos)).rejects.toThrow('RESEND_AUDIENCE_ID');
+      await expect(instance.publish(repos)).rejects.toThrow('RESEND_TO');
 
       expect(mockFetch).not.toHaveBeenCalled();
     });
 
-    it('should throw when RESEND_AUDIENCE_ID is empty', async () => {
+    it('should throw when RESEND_TO is empty', async () => {
       vi.stubEnv('RESEND_FROM', 'Sender <sender@example.com>');
-      vi.stubEnv('RESEND_AUDIENCE_ID', '');
+      vi.stubEnv('RESEND_TO', '');
       vi.stubEnv('RESEND_API_KEY', 're_live_key_123');
 
-      await expect(instance.publish(repos)).rejects.toThrow('RESEND_AUDIENCE_ID');
+      await expect(instance.publish(repos)).rejects.toThrow('RESEND_TO');
 
       expect(mockFetch).not.toHaveBeenCalled();
     });
 
     it('should throw when RESEND_API_KEY is missing', async () => {
       vi.stubEnv('RESEND_FROM', 'Sender <sender@example.com>');
-      vi.stubEnv('RESEND_AUDIENCE_ID', 'aud_123');
+      vi.stubEnv('RESEND_TO', 'user@gmail.com');
       vi.stubEnv('RESEND_API_KEY', undefined);
 
       await expect(instance.publish(repos)).rejects.toThrow('RESEND_API_KEY');
@@ -101,7 +101,7 @@ describe('resend.ts', () => {
 
     it('should throw when RESEND_API_KEY is empty', async () => {
       vi.stubEnv('RESEND_FROM', 'Sender <sender@example.com>');
-      vi.stubEnv('RESEND_AUDIENCE_ID', 'aud_123');
+      vi.stubEnv('RESEND_TO', 'user@gmail.com');
       vi.stubEnv('RESEND_API_KEY', '');
 
       await expect(instance.publish(repos)).rejects.toThrow('RESEND_API_KEY');
@@ -113,72 +113,16 @@ describe('resend.ts', () => {
   describe('publish', () => {
     const token = 're_live_key_123';
     const from = 'GitHub Trends <newsletter@example.com>';
-    const audienceId = 'aud_abc123';
+    const to = 'user@gmail.com';
 
     beforeEach(() => {
       vi.stubEnv('RESEND_API_KEY', token);
       vi.stubEnv('RESEND_FROM', from);
-      vi.stubEnv('RESEND_AUDIENCE_ID', audienceId);
+      vi.stubEnv('RESEND_TO', to);
     });
 
-    it('should make well-formed requests (draft then send)', async () => {
-      const id = 're_bc_001';
-
-      // Create draft broadcast
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: vi.fn().mockResolvedValue({ id }),
-        })
-        // Then send it
-        .mockResolvedValueOnce({
-          ok: true,
-          json: vi.fn().mockResolvedValue({ status: 'sent' }),
-        });
-
-      await expect(instance.publish(repos)).resolves.toBe(id);
-
-      // 1st request: create broadcast
-      expect(mockFetch).toHaveBeenNthCalledWith(
-        1,
-        ResendClient.baseUrl,
-        expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          }),
-        })
-      );
-
-      const [, draftOpts] = mockFetch.mock.calls[0]!;
-      const draftBody = JSON.parse(draftOpts!.body as string);
-      expect(draftBody).toEqual({
-        from,
-        audience_id: audienceId,
-        subject: instance.subject(),
-        name: instance.subject(),
-        html: content.html,
-        text: content.text,
-      });
-
-      // 2nd request: send
-      expect(mockFetch).toHaveBeenNthCalledWith(
-        2,
-        `${ResendClient.baseUrl}/${id}/send`,
-        expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          }),
-        })
-      );
-    });
-
-    it('should support draft mode (no send when RESEND_DRAFT=true)', async () => {
-      const id = 're_bc_002';
-      vi.stubEnv('RESEND_DRAFT', 'true');
+    it('should make a well-formed request', async () => {
+      const id = 're_email_001';
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -187,17 +131,30 @@ describe('resend.ts', () => {
 
       await expect(instance.publish(repos)).resolves.toBe(id);
 
-      // Only one call (no /send)
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockFetch).toHaveBeenCalledWith(
         ResendClient.baseUrl,
         expect.objectContaining({
           method: 'POST',
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }),
         })
       );
+
+      const [, opts] = mockFetch.mock.calls[0]!;
+      const body = JSON.parse(opts!.body as string);
+      expect(body).toEqual({
+        from,
+        to,
+        subject: instance.subject(),
+        html: content.html,
+        text: content.text,
+      });
     });
 
-    it('should throw when drafting returns no ID', async () => {
+    it('should throw when send returns no ID', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: vi.fn().mockResolvedValue({}), // no id
@@ -208,7 +165,7 @@ describe('resend.ts', () => {
       expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw on JSON parsing errors (draft response)', async () => {
+    it('should throw on JSON parsing errors', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: vi.fn().mockRejectedValue(new Error('invalid JSON')),
@@ -217,7 +174,7 @@ describe('resend.ts', () => {
       await expect(instance.publish(repos)).rejects.toThrow('invalid JSON');
     });
 
-    it('should throw on 5xx HTTP error (draft request)', async () => {
+    it('should throw on 5xx HTTP error', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
@@ -227,38 +184,8 @@ describe('resend.ts', () => {
       await expect(instance.publish(repos)).rejects.toThrowError(HttpError);
     });
 
-    it('should throw on 5xx HTTP error (send request)', async () => {
-      const id = 're_bc_003';
-
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: vi.fn().mockResolvedValue({ id }),
-        })
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 500,
-          text: vi.fn().mockResolvedValue('internal server error'),
-        });
-
-      await expect(instance.publish(repos)).rejects.toThrowError(HttpError);
-    });
-
-    it('should throw on network errors (draft request)', async () => {
+    it('should throw on network errors', async () => {
       mockFetch.mockRejectedValueOnce(new Error('network down'));
-
-      await expect(instance.publish(repos)).rejects.toThrow('network down');
-    });
-
-    it('should throw on network errors (send request)', async () => {
-      const id = 're_bc_004';
-
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: vi.fn().mockResolvedValue({ id }),
-        })
-        .mockRejectedValueOnce(new Error('network down'));
 
       await expect(instance.publish(repos)).rejects.toThrow('network down');
     });

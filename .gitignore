@@ -53,3 +53,8 @@ temp/
 
 # Private dir for testing
 releases/
+
+# Chei si fisiere locale cu secrete (nu se commit niciodata)
+.secrets/
+API.txt
+NPM START.png

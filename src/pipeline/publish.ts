@@ -1,6 +1,5 @@
 import { ButtondownPublisher } from '../publishers/buttondown';
 import { GitHubPublisher } from '../publishers/github';
-import { RSSPublisher } from '../publishers/rss';
 import { logInfo } from '../utils/logging';
 import { Publisher } from '../types/publisher';
 import { ResendPublisher } from '../publishers/resend';
@@ -11,7 +10,6 @@ const publishers = [
   new ButtondownPublisher(),
   new ResendPublisher(),
   new GitHubPublisher(),
-  new RSSPublisher(),
 ];
 
 export async function publishAll(

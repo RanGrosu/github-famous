@@ -24,9 +24,9 @@ export class ResendPublisher extends Publisher {
       throw new TaggedError('config', 'RESEND_FROM required when RESEND_ENABLED=true');
     }
 
-    const audienceId = process.env.RESEND_AUDIENCE_ID;
-    if (!audienceId) {
-      throw new TaggedError('config', 'RESEND_AUDIENCE_ID required when RESEND_ENABLED=true');
+    const to = process.env.RESEND_TO;
+    if (!to) {
+      throw new TaggedError('config', 'RESEND_TO required when RESEND_ENABLED=true');
     }
 
     const content = this.render(repos);
@@ -35,9 +35,8 @@ export class ResendPublisher extends Publisher {
     const replyTo = process.env.RESEND_REPLY_TO;
     const result = await client.sendEmail({
       from,
-      audience_id: audienceId,
+      to,
       subject: this.subject(),
-      name: this.subject(),
       html: content.html,
       text: content.text,
       ...(replyTo && { reply_to: replyTo }),
